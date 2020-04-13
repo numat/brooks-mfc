@@ -11,14 +11,14 @@ Installation
 ============
 
 ```
-pip install mfc
+pip install brooks_mfc
 ```
 
 Usage
 =====
 
 This driver uses an undocumented REST API in the devices's web interface for communication.
-The compatibility and stability of this interface with all Brooks conrtollers is not guaranteed.
+The compatibility and stability of this interface with all Brooks controllers is not guaranteed.
 
 ### Command Line
 
@@ -28,16 +28,21 @@ interface. You can read the flow rate with:
 ```
 $ brooks-mfc 192.168.1.200
 {
-  "actual": 4.99,
-  "gas": "CO2",
-  "max": 37,
-  "setpoint": 5.00,
-  "temperature": 27.34
+    "Customer Flow Totalizer": 0.0,
+    "Flow": -0.3,
+    "Flow Hours": 1.0,
+    "Flow Totalizer": 0.0,
+    "Live Setpoint": 0.0,
+    "Operational Hours": 50.0,
+    "Setpoint": 0.0,
+    "Supply Voltage": 22.93,
+    "Temperature": 27.11,
+    "Valve Position": 0.0
 }
 ```
 
 You can optionally specify a setpoint flow with:
-`mfc 192.168.1.150 --set 7.5. See `mfc --help` for more.
+`brooks-mfc 192.168.1.150 --set 7.5. See `mfc --help` for more.
 
 ### Python
 
@@ -55,16 +60,21 @@ async def get():
 asyncio.run(get())
 ```
 
-The API that matters is `get`, `set`, and `set_gas`.
+The API that matters is `get`, `set`.
 
 ```python
 >>> await fc.get()
 {
-  "actual": 4.99,
-  "gas": "CO2",
-  "max": 37,
-  "setpoint": 5.00,
-  "temperature": 27.34
+    "Customer Flow Totalizer": 0.0,
+    "Flow": -0.3,
+    "Flow Hours": 1.0,
+    "Flow Totalizer": 0.0,
+    "Live Setpoint": 0.0,
+    "Operational Hours": 50.0,
+    "Setpoint": 0.0,
+    "Supply Voltage": 22.93,
+    "Temperature": 27.11,
+    "Valve Position": 0.0
 }
 ```
 ```python
