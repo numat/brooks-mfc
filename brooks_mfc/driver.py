@@ -68,7 +68,7 @@ class FlowController(object):
         self.web_socket = None
         self.timeout = timeout
         self.password = password
-        self.headers = {"Content-Type": "application/x-www-form-urlencoded;"}
+        self.headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
     async def __aenter__(self):
         """Support `async with` by entering a client session."""
@@ -154,8 +154,15 @@ class FlowController(object):
             await self.connect_http()
         url = self.http_address + endpoint
         method = ('POST' if body else 'GET')
-        async with self.session.request(method, url, data=urlencode(body),
+        data = urlencode(body)
+        self.headers['Content-Length'] = str(len(data))
+        async with self.session.request(method, url, data=data,
                                         headers=self.headers) as r:
+            # I can't seem to get aiohttp to set cookies in it's client
+            # session correctly so I resort to this for now
+            if 'Set-Cookie' in r.headers:
+                cookie = r.headers['Set-Cookie'].replace(' ', '').split(';')[0]
+                self.headers['Cookie'] = cookie
             response = await r.text()
             if not response or r.status > 200:
                 if reconnect_on_error:
