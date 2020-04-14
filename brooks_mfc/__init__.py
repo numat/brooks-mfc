@@ -24,14 +24,11 @@ def command_line():
 
     async def run():
         try:
-            fc = FlowController(args.address)
-            if args.set is not None:
-                await fc.set(args.set)
-                await asyncio.sleep(0.1)
-            print(json.dumps(await fc.get(), indent=4, sort_keys=True))
-            # The polite close_connection call hangs so I go scorched earth
-            fc.web_socket.fail_connection()
-            exit(0)
+            async with FlowController(args.address) as fc:
+                if args.set is not None:
+                    await fc.set(args.set)
+                    await asyncio.sleep(0.1)
+                print(json.dumps(await fc.get(), indent=4, sort_keys=True))
         except asyncio.TimeoutError:
             sys.stderr.write(f'{red}Could not connect to device.{reset}\n')
 

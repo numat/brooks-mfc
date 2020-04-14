@@ -4,13 +4,10 @@ Python driver for Brooks Instrument flow controllers.
 Distributed under the GNU General Public License v2
 Copyright (C) 2020 NuMat Technologies
 """
-import asyncio
-import json
 from urllib.parse import urlencode
 
 
 import aiohttp
-import websockets
 
 ERROR_CODES = {
   "Alarm0": "Low Flow Alarm",
@@ -67,6 +64,7 @@ class FlowController(object):
         self.http_address = f"http://{address.lstrip('http://').rstrip('/')}/"
         self.ws_address = f"ws://{address.lstrip('http://').rstrip('/')}/"
         self.session = None
+        self.ws_session = None
         self.web_socket = None
         self.timeout = timeout
         self.password = password
@@ -102,7 +100,8 @@ class FlowController(object):
         Realtime process information is returned via an unauthenticated
         websocket connection.
         """
-        self.web_socket = await websockets.connect(self.ws_address)
+        self.ws_session = aiohttp.ClientSession(read_timeout=self.timeout)
+        self.web_socket = await self.ws_session.ws_connect(self.ws_address)
 
     async def disconnect(self):
         """Close the underlying session, if it exists."""
@@ -110,7 +109,7 @@ class FlowController(object):
             await self.session.close()
             self.session = None
         if self.web_socket is not None:
-            self.web_socket.close_connection()
+            self.ws_session.close()
             self.web_socket = None
 
     async def get(self):
@@ -120,9 +119,9 @@ class FlowController(object):
         """
         if not self.web_socket:
             await self.connect_ws()
-        await self.web_socket.send('A')
-        response = await asyncio.wait_for(self.web_socket.recv(), 2)
-        return {STATUS_CODE[k]: float(v) for k, v in json.loads(response).items()
+        await self.web_socket.send_str('A')
+        response = await self.web_socket.receive_json()
+        return {STATUS_CODE[k]: float(v) for k, v in response.items()
                 if k in STATUS_CODE}
 
     async def set(self, setpoint):
