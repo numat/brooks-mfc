@@ -1,5 +1,5 @@
-mfc
-===
+brooks-mfc
+==========
 
 Python driver and command-line tool for [Brooks Instrument mass flow controllers](https://www.brooksinstrument.com/en/products/mass-flow-controllers).
 
@@ -11,7 +11,7 @@ Installation
 ============
 
 ```
-pip install brooks_mfc
+pip install brooks-mfc
 ```
 
 Usage
