@@ -6,7 +6,6 @@ Copyright (C) 2020 NuMat Technologies
 """
 from urllib.parse import urlencode
 
-
 import aiohttp
 
 ERROR_CODES = {
@@ -36,17 +35,77 @@ ERROR_CODES = {
   "Warn27": "Supply Volts Low Warning"
 }
 
-STATUS_CODE = {'Fl': 'Flow', 'SP': 'Setpoint', 'LSP': 'Live Setpoint',
-                'VP': 'Valve Position', 'TP': 'Temperature',
-                'Tot': 'Flow Totalizer', 'Ctot': 'Customer Flow Totalizer',
-                'Hrs': 'Flow Hours', 'OpHrs': 'Operational Hours',
-                'Volt': 'Supply Voltage'}
+STATUS_CODE = {'Fl': 'Flow', 'SP': 'Setpoint', 'LSP': 'LiveSetpoint',
+                'VP': 'ValvePosition', 'TP': 'Temperature',
+                'Tot': 'FlowTotalizer', 'Ctot': 'CustomerFlowTotalizer',
+                'Hrs': 'FlowHours', 'OpHrs': 'OperationalHours',
+                'Volt': 'SupplyVoltage'}
+
+UNIT_CODES = {
+  'bbl/day':      2072,
+  'bbl/hr':       2071,
+  'bbl/min':      2070,
+  'bbl/sec':      2069,
+  'cc/day':       2051,
+  'cc/hr':        2050,
+  'cc/min':       2049,
+  'cc/sec':       2048,
+  'cu ft/day':    2059,
+  'cu ft/hr':     2058,
+  'cu ft/min':    5122,
+  'cu ft/sec':    2057,
+  'gal/day':      2064,
+  'gal/hr':       5130,
+  'gal/min':      5129,
+  'gal/sec':      5128,
+  'g/day':        2075,
+  'g/hr':         2074,
+  'g/min':        5135,
+  'g/sec':        2073,
+  'imp gal/day':  2068,
+  'imp gal/hr':   2067,
+  'imp gal/min':  2066,
+  'imp gal/sec':  2065,
+  'cu in/day':    2063,
+  'cu in/hr':     2062,
+  'cu in/min':    2061,
+  'cu in/sec':    2060,
+  'kg/day':       2077,
+  'kg/hr':        5136,
+  'kg/min':       2076,
+  'kg/sec':       5124,
+  'lbs/day':      2078,
+  'lbs/hr':       5133,
+  'lbs/min':      5132,
+  'lbs/sec':      5131,
+  'L/day':        2053,
+  'L/hr':         5140,
+  'L/min':        5139,
+  'L/sec':        5126,
+  'm3/day':       2056,
+  'm3/hr':        2055,
+  'm3/min':       2054,
+  'm3/sec':       5125,
+  'mL/day':       2052,
+  'mL/hr':        5138,
+  'mL/min':       5137,
+  'mL/sec':       5127,
+  'oz/day':       2082,
+  'oz/hr':        2081,
+  'oz/min':       2080,
+  'oz/sec':       2079,
+  '%':            4103,
+  'percent':      4103,
+  'sccm':         5120,
+  'slpm':         5121
+}
 
 
 class FlowController(object):
     """Driver for Brooks Instrument mass flow controllers."""
 
-    def __init__(self, address, timeout=10, password='control'):
+    def __init__(self, address: str, timeout: float = 10,
+                 password: str = 'control'):
         """Initialize device.
 
         Note that this constructor does not not connect. This will happen
@@ -112,11 +171,15 @@ class FlowController(object):
             self.ws_session.close()
             self.web_socket = None
 
-    async def get(self):
+    async def get(self, units: str = None):
         """Retrieve the device state.
 
         This is done using a websocket interface.
+
+        Args:
+            units: The units for the flow meter. If blank use existing units.
         """
+        await self._set_units(units, 'flow')
         if not self.web_socket:
             await self.connect_ws()
         await self.web_socket.send_str('A')
@@ -124,25 +187,29 @@ class FlowController(object):
         return {STATUS_CODE[k]: float(v) for k, v in response.items()
                 if k in STATUS_CODE}
 
-    async def set(self, setpoint):
+    async def set(self, setpoint: float, units: str = None):
         """Set the setpoint flow rate, in percent.
 
         This uses an undocumented HTTP extension, `Control.html`.
 
         Args:
-            setpoint: Setpoint flow, as a float, in percent.
+            setpoint: Setpoint flow, as a float.
+            units: The units for the setpoint. If blank use existing units.
         """
-        if setpoint < 0 or setpoint > 100:
-            raise ValueError(f"Setpoint must be between 0 and 100 percent.")
+        await self._set_units(units, 'setpoint')
         await self._request('Control.html', {0: setpoint})
 
-    async def open(self):
-        """Set the flow to its maximum value."""
-        await self.set(100)
-
-    async def close(self):
-        """Set the flow to zero."""
-        await self.set(0)
+    async def set_units(self, units=None, target='flow'):
+        """Set the flow meter units"""
+        if units is None:
+            return
+        index = ['flow', 'setpoint'].index(target)
+        try:
+            await self._request('Units.html',
+                                {index: UNIT_CODES[units.lower()]})
+        except IndexError:
+            raise ValueError(
+                f"{units} is not a valid unit for this flow controller")
 
     async def _request(self, endpoint, body=None, reconnect_on_error=True):
         """Handle sending an HTTP request.

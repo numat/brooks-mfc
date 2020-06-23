@@ -17,6 +17,8 @@ def command_line():
     parser = argparse.ArgumentParser(description="Control an Brooks Instrument MFC "
                                                  "from the command line.")
     parser.add_argument('address', help="The IP address of the MFC")
+    parser.add_argument('--units', '-u', default=None, type=str,
+                        help="Specify the units for the setpoint and flow.")
     parser.add_argument('--set', '-s', default=None, type=float,
                         help="Sets the setpoint flow of the mass flow controller, "
                              "in units specified in the manual (likely sccm).")
@@ -26,9 +28,10 @@ def command_line():
         try:
             async with FlowController(args.address) as fc:
                 if args.set is not None:
-                    await fc.set(args.set)
+                    await fc.set(args.set, args.units)
                     await asyncio.sleep(0.1)
-                print(json.dumps(await fc.get(), indent=4, sort_keys=True))
+                print(json.dumps(await fc.get(args.units), indent=4,
+                                 sort_keys=True))
         except asyncio.TimeoutError:
             sys.stderr.write(f'{red}Could not connect to device.{reset}\n')
 

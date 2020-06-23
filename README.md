@@ -41,8 +41,9 @@ $ brooks-mfc 192.168.1.200
 }
 ```
 
-You can optionally specify a setpoint flow with:
-`brooks-mfc 192.168.1.150 --set 7.5. See `mfc --help` for more.
+You can optionally specify a setpoint flow with the set flag:
+`brooks-mfc 192.168.1.150 --set 7.5.` The units of the setpoint and return are
+specified using the `--units` flag. See `mfc --help` for more.
 
 ### Python
 
@@ -60,10 +61,13 @@ async def get():
 asyncio.run(get())
 ```
 
-The API that matters is `get`, `set`.
+The API that matters is `get`, `set`. Optionally, units can be passed with 
+either command. If no units are specified the existing units configured for
+the device are used.
 
 ```python
 >>> await fc.get()
+>>> await fc.get('%')
 {
     "Customer Flow Totalizer": 0.0,
     "Flow": -0.3,
@@ -79,6 +83,9 @@ The API that matters is `get`, `set`.
 ```
 ```python
 >>> await fc.set(10)
->>> await fc.open()   # set to max flow
->>> await fc.close()  # set to zero flow
+>>> await fc.set(10, 'SCCM')
 ```
+
+There's much more that could be set or returned from the flow controllers but 
+I haven't had a reason to flesh all the the options out. Feel free to submit an 
+issue with requests or a PR.
