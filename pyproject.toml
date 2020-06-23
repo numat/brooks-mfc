@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "brooks_mfc"
-version = "0.1.2"
+version = "0.1.3"
 description = "Python driver for Brooks Instrument mass flow controllers"
 license = "GPLv2"
 authors = ["jamesjeffryes <jamesgjeffryes@gmail.com>"]

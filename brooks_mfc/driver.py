@@ -148,7 +148,7 @@ class FlowController(object):
         post requests with a valid session cookie. This method refreshes that
         connection.
         """
-        self.session = aiohttp.ClientSession(read_timeout=self.timeout)
+        self.session = aiohttp.ClientSession(timeout=self.timeout)
         await self._request("brooks_login.html",
                             body={'password': 'control', 'access_level': 2},
                             reconnect_on_error=False)
@@ -159,7 +159,7 @@ class FlowController(object):
         Realtime process information is returned via an unauthenticated
         websocket connection.
         """
-        self.ws_session = aiohttp.ClientSession(read_timeout=self.timeout)
+        self.ws_session = aiohttp.ClientSession(timeout=self.timeout)
         self.web_socket = await self.ws_session.ws_connect(self.ws_address)
 
     async def disconnect(self):
@@ -199,7 +199,7 @@ class FlowController(object):
         await self._set_units(units, 'setpoint')
         await self._request('Control.html', {0: setpoint})
 
-    async def set_units(self, units=None, target='flow'):
+    async def _set_units(self, units=None, target='flow'):
         """Set the flow meter units"""
         if units is None:
             return
