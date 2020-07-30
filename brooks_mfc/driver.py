@@ -125,7 +125,7 @@ class FlowController(object):
         self.session = None
         self.ws_session = None
         self.web_socket = None
-        self.timeout = timeout
+        self.timeout = aiohttp.ClientTimeout(total=timeout)
         self.password = password
         self.headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
@@ -168,7 +168,7 @@ class FlowController(object):
             await self.session.close()
             self.session = None
         if self.web_socket is not None:
-            self.ws_session.close()
+            await self.ws_session.close()
             self.web_socket = None
 
     async def get(self, units: str = None):
