@@ -36,10 +36,10 @@ ERROR_CODES = {
 }
 
 STATUS_CODE = {'Fl': 'Flow', 'SP': 'Setpoint', 'LSP': 'LiveSetpoint',
-                'VP': 'ValvePosition', 'TP': 'Temperature',
-                'Tot': 'FlowTotalizer', 'Ctot': 'CustomerFlowTotalizer',
-                'Hrs': 'FlowHours', 'OpHrs': 'OperationalHours',
-                'Volt': 'SupplyVoltage'}
+               'VP': 'ValvePosition', 'TP': 'Temperature',
+               'Tot': 'FlowTotalizer', 'Ctot': 'CustomerFlowTotalizer',
+               'Hrs': 'FlowHours', 'OpHrs': 'OperationalHours',
+               'Volt': 'SupplyVoltage'}
 
 UNIT_CODES = {
   'bbl/day':      2072,
@@ -142,7 +142,7 @@ class FlowController(object):
         await self.disconnect()
 
     async def connect_http(self):
-        """Connect to server and authenticate
+        """Connect to server and authenticate.
 
         Configuration and some device information retrieval is done though
         post requests with a valid session cookie. This method refreshes that
@@ -188,7 +188,7 @@ class FlowController(object):
                 if k in STATUS_CODE}
 
     async def set(self, setpoint: float, units: str = None):
-        """Set the setpoint flow rate, in percent.
+        """Set the setpoint flow rate, in various units.
 
         This uses an undocumented HTTP extension, `Control.html`.
 
@@ -200,7 +200,7 @@ class FlowController(object):
         await self._request('Control.html', {0: setpoint})
 
     async def _set_units(self, units=None, target='flow'):
-        """Set the flow meter units"""
+        """Set the flow meter units for either flow or setpoint."""
         if units is None:
             return
         index = ['flow', 'setpoint'].index(target)
@@ -225,7 +225,7 @@ class FlowController(object):
         self.headers['Content-Length'] = str(len(data))
         async with self.session.request(method, url, data=data,
                                         headers=self.headers) as r:
-            # I can't seem to get aiohttp to set cookies in it's client
+            # I can't seem to get aiohttp to set cookies in its client
             # session correctly so I resort to this for now
             if 'Set-Cookie' in r.headers:
                 cookie = r.headers['Set-Cookie'].replace(' ', '').split(';')[0]

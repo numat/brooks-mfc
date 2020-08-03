@@ -40,10 +40,12 @@ $ brooks-mfc 192.168.1.200
     "Valve Position": 0.0
 }
 ```
+Note the "Live Setpoint" is in the configured units (which could be percent of full scale or engineering units).  "Setpoint" is always in % of full scale.
 
 You can optionally specify a setpoint flow with the set flag:
 `brooks-mfc 192.168.1.150 --set 7.5.` The units of the setpoint and return are
-specified using the `--units` flag. See `mfc --help` for more.
+specified using the `--units` flag, or the currently configured units if no flag
+is passed. See `brooks-mfc --help` for more.
 
 ### Python
 
@@ -61,7 +63,7 @@ async def get():
 asyncio.run(get())
 ```
 
-The API that matters is `get`, `set`. Optionally, units can be passed with 
+The API that matters is `get`, `set`. Optionally, units can be passed with
 either command. If no units are specified the existing units configured for
 the device are used.
 
@@ -86,6 +88,6 @@ the device are used.
 >>> await fc.set(10, 'SCCM')
 ```
 
-There's much more that could be set or returned from the flow controllers but 
-I haven't had a reason to flesh all the the options out. Feel free to submit an 
+There's much more that could be set or returned from the flow controllers but
+I haven't had a reason to flesh all the the options out. Feel free to submit an
 issue with requests or a PR.

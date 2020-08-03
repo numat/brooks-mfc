@@ -1,3 +1,5 @@
+"""Partial mock of Brooks Instrument MFC.  Does not support changing units."""
+
 import random
 
 import asyncio
@@ -6,7 +8,8 @@ from unittest.mock import MagicMock
 
 
 class AsyncMock(MagicMock):
-    """Magic mock that works with async methods"""
+    """Magic mock that works with async methods."""
+
     async def __call__(self, *args, **kwargs):
         return super(AsyncMock, self).__call__(*args, **kwargs)
 
@@ -39,9 +42,20 @@ class FlowController(AsyncMock):
             self.state['Supply Voltage'] = 23 + random.random()
 
     async def get(self, units: str = None):
+        """Get the current state of the controller.
+
+        Args:
+            units: the units for the flow  (ignored in the mock).
+        """
         await asyncio.sleep(0.1)
         return self.state
 
     async def set(self, setpoint: float, units: str = None):
+        """Set the flow setpoint of the controller.
+
+        Args:
+            setpoint: the flow setpoint to set (in current units)
+            units: the units for the setpoint (ignored in the mock).
+        """
         await asyncio.sleep(0.2)
         self.state['Setpoint'] = setpoint
