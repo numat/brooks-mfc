@@ -1,5 +1,6 @@
 """
 Python driver for Brooks Instrument flow controllers.
+
 Distributed under the GNU General Public License v2
 Copyright (C) 2020 NuMat Technologies
 """
@@ -7,21 +8,21 @@ from brooks_mfc.driver import FlowController
 
 
 def command_line():
-    """Command-line tool for MKS mass flow controllers."""
+    """Command-line tool for Brooks mass flow controllers."""
     import argparse
     import asyncio
     import json
     import sys
     red, reset = '\033[1;31m', '\033[0m'
 
-    parser = argparse.ArgumentParser(description="Control an Brooks Instrument MFC "
+    parser = argparse.ArgumentParser(description="Control a Brooks Instrument MFC "
                                                  "from the command line.")
     parser.add_argument('address', help="The IP address of the MFC")
     parser.add_argument('--units', '-u', default=None, type=str,
                         help="Specify the units for the setpoint and flow.")
     parser.add_argument('--set', '-s', default=None, type=float,
-                        help="Sets the setpoint flow of the mass flow controller, "
-                             "in units specified in the manual (likely sccm).")
+                        help="Set the flow setpoint of the mass flow controller, "
+                             "in units configured in the device (likely SLPM).")
     args = parser.parse_args()
 
     async def run():
