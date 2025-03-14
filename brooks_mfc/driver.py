@@ -199,6 +199,14 @@ class FlowController(object):
         await self._set_units(units, 'setpoint')
         await self._request('Control.html', {0: setpoint})
 
+    async def set_safe_state(self, safe_state: bool):
+        """Set the 'safe' state, required for the MFC to control.
+
+        Args:
+            state:  True sets MFC into working state, False sets MFC into idle state
+        """
+        await self._request('safe_state.html', {0: 0 if safe_state else 1})
+
     async def _set_units(self, units=None, target='flow'):
         """Set the flow meter units for either flow or setpoint."""
         if units is None:
